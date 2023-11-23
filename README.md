@@ -1,2 +1,2 @@
 # EventDispatcher
-Pure event dispatcher
+Pure Event Dispatcher
