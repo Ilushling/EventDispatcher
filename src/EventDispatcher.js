@@ -1,106 +1,157 @@
-export class EventDispatcher {
-  constructor() {
-    this.init();
-  }
+export default class EventDispatcher {
+  /** @type {{[eventName: string]: ((data: any) => any)[]}} */
+  #listeners;
+  /** @type {{[eventName: string]: Map<(data: any) => any, number>}} */
+  #listenersMap;
 
-  init() {
+  constructor() {
     // Array for fast backward iteration without functions
-    this.listeners = {};
+    this.#listeners = {};
     // Map of function-index
-    this.listenersMap = {};
+    this.#listenersMap = {};
   }
 
   clear() {
-    this.listeners = {};
-    this.listenersMap = {};
+    this.#listeners = {};
+    this.#listenersMap = {};
   }
 
-  addEventListener(eventName, listener) {
-    if (this.hasEventListener(eventName, listener)) {
+  /**
+   * @param {string} eventName
+   * @param {(data: any) => any} listener
+   */
+  on(eventName, listener) {
+    if (this.has(eventName, listener)) {
       return;
     }
 
-    if (this.listeners[eventName] == null) {
-      this.listeners[eventName] = [];
-    }
+    const listeners = this.#listeners;
+    const listenersMap = this.#listenersMap;
 
-    const index = this.listeners[eventName].push(listener) - 1;
-    if (this.listenersMap[eventName] == null) {
-      this.listenersMap[eventName] = new Map();
-    }
-    this.listenersMap[eventName].set(listener, index);
+    const eventListeners = listeners[eventName] ??= [];
+    const eventListenersMap = listenersMap[eventName] ??= new Map();
 
-    const removeEventListener = () => {
-      this.removeEventListener(eventName, listener);
+    const index = eventListeners.push(listener) - 1;
+    eventListenersMap.set(listener, index);
+
+    const remove = () => {
+      this.remove(eventName, listener);
     };
 
-    return removeEventListener;
+    return remove;
   }
 
+  /**
+   * @param {string} eventName
+   * @param {(data: any) => any} listener
+   */
   once(eventName, listener) {
-    const callback = data => {
-      this.removeEventListener(eventName, callback);
+    const callback = (/** @type {any} */ data) => {
+      this.remove(eventName, callback);
       listener(data);
     };
 
     return this.addEventListener(eventName, callback);
   }
 
-  hasEventListener(eventName, listener) {
-    return this.listenersMap[eventName] && this.listenersMap[eventName].has(listener);
+  /**
+   * @param {string} eventName
+   * @param {(data: any) => any} listener
+   */
+  has(eventName, listener) {
+    const listenersMap = this.#listenersMap;
+
+    return listenersMap[eventName]?.has(listener) ?? false;
   }
 
+  /**
+   * @param {string} eventName
+   */
   hasEventListeners(eventName) {
-    return this.listeners[eventName] != null;
+    return eventName in this.#listeners;
   }
 
-  removeEventListener(eventName, listener) {
-    if (!this.hasEventListener(eventName, listener)) {
+  /**
+   * @param {string} eventName
+   * @param {(data: any) => any} listener
+   */
+  remove(eventName, listener) {
+    if (!this.has(eventName, listener)) {
       return;
     }
+    const listeners = this.#listeners;
+    const listenersMap = this.#listenersMap;
 
     if (listener == null) {
-      delete this.listeners[eventName];
-      delete this.listenersMap[eventName];
+      delete listeners[eventName];
+      delete listenersMap[eventName];
       return;
     }
 
-    const listeners = this.listeners[eventName];
-    const listenersMap = this.listenersMap[eventName];
+    const eventListeners = listeners[eventName];
+    const eventListenersMap = listenersMap[eventName];
 
-    const listenerIndex = listenersMap.get(listener);
-
-    if (listenerIndex !== -1) {
-      const lastListener = listeners.pop();
-      if (listeners.length !== 0) {
-        const listenerToDelete = listeners[listenerIndex];
-        listenersMap.delete(listenerToDelete);
-        listenersMap.set(lastListener, listenerIndex);
-
-        listeners[listenerIndex] = lastListener;
-      } else {
-        delete this.listenersMap[eventName];
-        // listenersMap.delete(lastListener);
-      }
+    let listenersCount = eventListeners.length ?? 0;
+    if (listenersCount == null) {
+      return;
     }
-  }
 
-  dispatchEvent(eventName, data) {
-    const listeners = this.listeners[eventName];
-    const listenersCount = listeners ? listeners.length : 0;
     if (listenersCount === 0) {
+      delete listenersMap[eventName];
+      // listenersMap.delete(lastListener);
       return;
     }
 
-    for (let i = listenersCount; i--;) {
-      listeners[i](data);
+    const listenerIndex = eventListenersMap.get(listener);
+
+    if (listenerIndex == null || listenerIndex === -1) {
+      return;
+    }
+
+    const lastListener = eventListeners.pop();
+
+    listenersCount = eventListeners.length;
+    const isLastListener = listenerIndex === listenersCount;
+
+    if (listenersCount === 0) {
+      delete listeners[eventName];
+      delete listenersMap[eventName];
+
+      return;
+    }
+
+    if (lastListener == null) {
+      return;
+    }
+
+    const listenerToDelete = eventListeners[listenerIndex];
+    eventListenersMap.delete(listenerToDelete);
+
+    if (!isLastListener) {
+      eventListenersMap.set(lastListener, listenerIndex);
+      eventListeners[listenerIndex] = lastListener;
     }
   }
 
-  on = this.addEventListener;
-  one = this.once;
-  off = this.hasEventListener;
-  remove = this.removeEventListener;
-  emit = this.dispatchEvent;
-  trigger = this.dispatchEvent;
+  /**
+   * @param {string} eventName
+   * @param {any} data
+   */
+  emit(eventName, data) {
+    const eventListeners = this.#listeners[eventName];
+
+    const eventListenersCount = eventListeners.length ?? 0;
+    if (eventListenersCount === 0) {
+      return;
+    }
+
+    for (let i = eventListenersCount; i--;) {
+      eventListeners[i](data);
+    }
+  }
+
+  addEventListener = this.on;
+  hasEventListener = this.has;
+  removeEventListener = this.remove;
+  dispatchEvent = this.emit;
 }
