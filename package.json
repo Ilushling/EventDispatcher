@@ -1,24 +1,21 @@
 {
   "name": "eved",
   "version": "1.0.0",
-  "description": "Pure Event Dispatcher",
+  "description": "Event Dispatcher",
   "type": "module",
-  "directories": {
-    "test": "tests"
-  },
+  "author": "Ilushling",
+  "license": "MIT",
   "scripts": {
     "test": "node --test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Ilushling/EventDispatcher.git"
   },
   "keywords": [
     "event",
     "dispatcher"
   ],
-  "author": "Ilushling",
-  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ilushling/EventDispatcher.git"
+  },
   "bugs": {
     "url": "https://github.com/Ilushling/EventDispatcher/issues"
   },
