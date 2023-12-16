@@ -21,6 +21,6 @@
   },
   "homepage": "https://github.com/Ilushling/EventDispatcher#readme",
   "devDependencies": {
-    "@types/node": "^20.9.4"
+    "@types/node": "^20.10.4"
   }
 }
