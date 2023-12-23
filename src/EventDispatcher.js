@@ -145,7 +145,7 @@ export default class EventDispatcher {
       return;
     }
 
-    for (let i = eventListenersCount; i--;) {
+    for (let i = 0; i < eventListenersCount; i++) {
       eventListeners[i](data);
     }
   }
