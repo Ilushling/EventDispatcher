@@ -1,11 +1,16 @@
+/**
+ * @typedef {(data?: any) => any} Listener
+ * @typedef {Record<string, Listener[]>} Listeners
+ * 
+ * @typedef {Record<string, Map<Listener, number>>} ListenerMap
+ */
 export default class EventDispatcher {
-  /** @type {{[eventName: string]: ((data: any) => any)[]}} */
+  /** @type {Listeners} */
   #listeners;
-  /** @type {{[eventName: string]: Map<(data: any) => any, number>}} */
+  /** @type {ListenerMap} */
   #listenersMap;
 
   constructor() {
-    // Array for fast backward iteration without functions
     this.#listeners = {};
     // Map of function-index
     this.#listenersMap = {};
@@ -18,7 +23,7 @@ export default class EventDispatcher {
 
   /**
    * @param {string} eventName
-   * @param {(data: any) => any} listener
+   * @param {Listener} listener
    */
   on(eventName, listener) {
     if (this.has(eventName, listener)) {
@@ -43,7 +48,7 @@ export default class EventDispatcher {
 
   /**
    * @param {string} eventName
-   * @param {(data: any) => any} listener
+   * @param {Listener} listener
    */
   once(eventName, listener) {
     const callback = (/** @type {any} */ data) => {
@@ -51,12 +56,12 @@ export default class EventDispatcher {
       listener(data);
     };
 
-    return this.addEventListener(eventName, callback);
+    return this.on(eventName, callback);
   }
 
   /**
    * @param {string} eventName
-   * @param {(data: any) => any} listener
+   * @param {Listener} listener
    */
   has(eventName, listener) {
     const listenersMap = this.#listenersMap;
@@ -73,7 +78,7 @@ export default class EventDispatcher {
 
   /**
    * @param {string} eventName
-   * @param {(data: any) => any} listener
+   * @param {Listener} listener
    */
   remove(eventName, listener) {
     if (!this.has(eventName, listener)) {
@@ -98,7 +103,6 @@ export default class EventDispatcher {
 
     if (listenersCount === 0) {
       delete listenersMap[eventName];
-      // listenersMap.delete(lastListener);
       return;
     }
 
@@ -135,7 +139,7 @@ export default class EventDispatcher {
 
   /**
    * @param {string} eventName
-   * @param {any} data
+   * @param {any=} data
    */
   emit(eventName, data) {
     const eventListeners = this.#listeners[eventName];
