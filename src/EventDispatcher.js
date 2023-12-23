@@ -149,9 +149,4 @@ export default class EventDispatcher {
       eventListeners[i](data);
     }
   }
-
-  addEventListener = this.on;
-  hasEventListener = this.has;
-  removeEventListener = this.remove;
-  dispatchEvent = this.emit;
 }

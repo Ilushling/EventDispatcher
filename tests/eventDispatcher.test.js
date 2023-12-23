@@ -103,7 +103,7 @@ describe('eventDispatcher', () => {
 
     eventDispatcher.on('1', callback1);
     eventDispatcher.on('1', callback2);
-    eventDispatcher.removeEventListener('1', callback1);
+    eventDispatcher.remove('1', callback1);
     eventDispatcher.emit('1', 1);
 
     if (isCall1 && !isCall2) {
@@ -135,7 +135,7 @@ describe('eventDispatcher', () => {
     eventDispatcher.on('1', callback1);
     eventDispatcher.on('1', callback2);
 
-    eventDispatcher.removeEventListener('1', callback2);
+    eventDispatcher.remove('1', callback2);
 
     eventDispatcher.emit('1', 1);
 
@@ -174,7 +174,7 @@ describe('eventDispatcher', () => {
     eventDispatcher.on('1', callback2);
     eventDispatcher.on('1', callback3);
 
-    eventDispatcher.removeEventListener('1', callback2);
+    eventDispatcher.remove('1', callback2);
 
     eventDispatcher.emit('1', 1);
 
