@@ -4,6 +4,14 @@ import { describe, it } from 'node:test';
 import EventDispatcher from '../src/EventDispatcher.js';
 
 describe('eventDispatcher', () => {
+  it('single emit', () => {
+    const eventDispatcher = new EventDispatcher();
+
+    eventDispatcher.emit('1', 1);
+
+    assert.ok('success emit');
+  });
+
   it('on & emit', () => {
     const eventDispatcher = new EventDispatcher();
 

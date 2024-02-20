@@ -144,6 +144,10 @@ export default class EventDispatcher {
   emit(eventName, data) {
     const eventListeners = this.#listeners[eventName];
 
+    if (eventListeners == null) {
+      return;
+    }
+
     const eventListenersCount = eventListeners.length ?? 0;
     if (eventListenersCount === 0) {
       return;
