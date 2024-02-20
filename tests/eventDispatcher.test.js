@@ -12,6 +12,15 @@ describe('eventDispatcher', () => {
     assert.ok('success emit');
   });
 
+  it('single remove', () => {
+    const eventDispatcher = new EventDispatcher();
+
+    eventDispatcher.remove('1');
+
+    assert.ok('success remove');
+  });
+
+
   it('on & emit', () => {
     const eventDispatcher = new EventDispatcher();
 

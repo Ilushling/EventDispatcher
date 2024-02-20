@@ -7,6 +7,7 @@
 export default class EventDispatcher {
   /** @type {Listeners} */
   #listeners;
+
   /** @type {ListenerMap} */
   #listenersMap;
 
@@ -77,19 +78,29 @@ export default class EventDispatcher {
   }
 
   /**
+   * @overload
    * @param {string} eventName
    * @param {Listener} listener
+   * @returns {void}
+   *
+   * @overload
+   * @param {string} eventName
+   * @returns {void}
+   * 
+   * @param {string} eventName
+   * @param {Listener=} listener
    */
   remove(eventName, listener) {
-    if (!this.has(eventName, listener)) {
-      return;
-    }
     const listeners = this.#listeners;
     const listenersMap = this.#listenersMap;
 
     if (listener == null) {
       delete listeners[eventName];
       delete listenersMap[eventName];
+      return;
+    }
+
+    if (!this.has(eventName, listener)) {
       return;
     }
 
@@ -138,6 +149,15 @@ export default class EventDispatcher {
   }
 
   /**
+   * @overload
+   * @param {string} eventName
+   * @param {any} data
+   * @returns {void}
+   *
+   * @overload
+   * @param {string} eventName
+   * @returns {void}
+   * 
    * @param {string} eventName
    * @param {any=} data
    */
