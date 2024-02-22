@@ -20,6 +20,19 @@ describe('eventDispatcher', () => {
     assert.ok('success remove');
   });
 
+  it('on error & emit', () => {
+    const eventDispatcher = new EventDispatcher();
+
+    const callback = () => {
+      throw new Error('Error');
+    };
+
+    eventDispatcher.on('1', callback);
+
+    eventDispatcher.emit('1', 1);
+
+    assert.ok('success emit');
+  });
 
   it('on & emit', () => {
     const eventDispatcher = new EventDispatcher();

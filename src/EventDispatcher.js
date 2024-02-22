@@ -174,7 +174,11 @@ export default class EventDispatcher {
     }
 
     for (let i = 0; i < eventListenersCount; i++) {
-      eventListeners[i](data);
+      try {
+        eventListeners[i](data);
+      } catch (e) {
+
+      }
     }
   }
 }
