@@ -1,19 +1,27 @@
 /**
- * @typedef {(data?: any) => any} Listener
- * @typedef {Record<string, Listener[]>} Listeners
- * 
- * @typedef {Record<string, Map<Listener, number>>} ListenerMap
+ * @implements {IEventDispatcher}
  */
 export default class EventDispatcher {
-  /** @type {Listeners} */
+  /**
+   * @typedef {import('./IEventDispatcher.js').IEventDispatcher} IEventDispatcher
+   */
+
+  /**
+   * @typedef {import('./IEventDispatcher.js').EventDispatcherProperties} EventDispatcherProperties
+   */
+
+  /**
+   * @typedef {import('./IEventDispatcher.js').Listener} Listener
+   */
+
+  /** @type {EventDispatcherProperties['listeners']} */
   #listeners;
 
-  /** @type {ListenerMap} */
+  /** @type {EventDispatcherProperties['listenersMap']} */
   #listenersMap;
 
   constructor() {
     this.#listeners = {};
-    // Map of function-index
     this.#listenersMap = {};
   }
 
@@ -22,10 +30,7 @@ export default class EventDispatcher {
     this.#listenersMap = {};
   }
 
-  /**
-   * @param {string} eventName
-   * @param {Listener} listener
-   */
+  /** @type {IEventDispatcher['on']} */
   on(eventName, listener) {
     if (this.has(eventName, listener)) {
       return;
@@ -40,17 +45,12 @@ export default class EventDispatcher {
     const index = eventListeners.push(listener) - 1;
     eventListenersMap.set(listener, index);
 
-    const remove = () => {
-      this.remove(eventName, listener);
-    };
+    const remove = () => this.remove(eventName, listener);
 
     return remove;
   }
 
-  /**
-   * @param {string} eventName
-   * @param {Listener} listener
-   */
+  /** @type {IEventDispatcher['once']} */
   once(eventName, listener) {
     const callback = (/** @type {any} */ data) => {
       this.remove(eventName, callback);
@@ -60,19 +60,19 @@ export default class EventDispatcher {
     return this.on(eventName, callback);
   }
 
-  /**
-   * @param {string} eventName
-   * @param {Listener} listener
-   */
+  /** @type {IEventDispatcher['has']} */
   has(eventName, listener) {
     const listenersMap = this.#listenersMap;
+    const eventListenersMap = listenersMap[eventName];
 
-    return listenersMap[eventName]?.has(listener) ?? false;
+    if (eventListenersMap == null) {
+      return false;
+    }
+
+    return eventListenersMap.has(listener);
   }
 
-  /**
-   * @param {string} eventName
-   */
+  /** @type {IEventDispatcher['hasEventListeners']} */
   hasEventListeners(eventName) {
     return eventName in this.#listeners;
   }
@@ -89,6 +89,8 @@ export default class EventDispatcher {
    * 
    * @param {string} eventName
    * @param {Listener=} listener
+   * 
+   * @type {IEventDispatcher['remove']}
    */
   remove(eventName, listener) {
     const listeners = this.#listeners;
@@ -151,7 +153,7 @@ export default class EventDispatcher {
   /**
    * @overload
    * @param {string} eventName
-   * @param {any} data
+   * @param {unknown} data
    * @returns {void}
    *
    * @overload
@@ -159,7 +161,9 @@ export default class EventDispatcher {
    * @returns {void}
    * 
    * @param {string} eventName
-   * @param {any=} data
+   * @param {unknown=} data
+   * 
+   * @type {IEventDispatcher['emit']}
    */
   emit(eventName, data) {
     const eventListeners = this.#listeners[eventName];

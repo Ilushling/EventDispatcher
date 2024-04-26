@@ -5,7 +5,7 @@
   "type": "module",
   "author": "Ilushling",
   "license": "MIT",
-  "main": "./src/EventDispatcher.js",
+  "main": "./index.js",
   "scripts": {
     "test": "node --test"
   },
@@ -22,6 +22,6 @@
   },
   "homepage": "https://github.com/Ilushling/EventDispatcher#readme",
   "devDependencies": {
-    "@types/node": "^20.10.5"
+    "@types/node": "^20.12.7"
   }
 }
