@@ -23,15 +23,14 @@ describe('eventDispatcher', () => {
   it('on error & emit', () => {
     const eventDispatcher = new EventDispatcher();
 
+    const error = new Error('Error');
     const callback = () => {
-      throw new Error('Error');
+      throw error;
     };
 
     eventDispatcher.on('1', callback);
 
-    eventDispatcher.emit('1', 1);
-
-    assert.ok('success emit');
+    assert.doesNotThrow(() => eventDispatcher.emit('1'));
   });
 
   it('on & emit', () => {
@@ -39,7 +38,10 @@ describe('eventDispatcher', () => {
 
     let isCall = false;
 
-    const callback = (/** @type {number} */ data) => {
+    /**
+     * @param {number} data
+     */
+    const callback = data => {
       isCall = true;
       assert.strictEqual(data, 1);
     };
@@ -59,11 +61,17 @@ describe('eventDispatcher', () => {
     let isCall1 = false;
     let isCall2 = false;
 
-    const callback1 = (/** @type {number} */ data) => {
+    /**
+     * @param {number} data
+     */
+    const callback1 = data => {
       isCall1 = true;
       assert.strictEqual(data, 1);
     };
-    const callback2 = (/** @type {number} */ data) => {
+    /**
+     * @param {number} data
+     */
+    const callback2 = data => {
       isCall2 = true;
       assert.strictEqual(data, 2);
     };
@@ -91,11 +99,17 @@ describe('eventDispatcher', () => {
     let isCall1 = false;
     let isCall2 = false;
 
-    const callback1 = (/** @type {number} */ data) => {
+    /**
+     * @param {number} data
+     */
+    const callback1 = data => {
       isCall1 = true;
       assert.strictEqual(data, 1);
     };
-    const callback2 = (/** @type {number} */ data) => {
+    /**
+     * @param {number} data
+     */
+    const callback2 = data => {
       isCall2 = true;
       assert.strictEqual(data, 1);
     };
@@ -122,18 +136,26 @@ describe('eventDispatcher', () => {
     let isCall1 = false;
     let isCall2 = false;
 
-    const callback1 = (/** @type {number} */ data) => {
+    /**
+     * @param {number} data
+     */
+    const callback1 = data => {
       isCall1 = true;
       assert.strictEqual(data, 1);
     };
-    const callback2 = (/** @type {number} */ data) => {
+    /**
+     * @param {number} data
+     */
+    const callback2 = data => {
       isCall2 = true;
       assert.strictEqual(data, 1);
     };
 
     eventDispatcher.on('1', callback1);
     eventDispatcher.on('1', callback2);
+
     eventDispatcher.remove('1', callback1);
+
     eventDispatcher.emit('1', 1);
 
     if (isCall1 && !isCall2) {
@@ -153,21 +175,28 @@ describe('eventDispatcher', () => {
     let isCall1 = false;
     let isCall2 = false;
 
-    const callback1 = (/** @type {number} */ data) => {
+    /**
+     * @param {number} data
+     */
+    const callback1 = data => {
       isCall1 = true;
       assert.strictEqual(data, 1);
     };
-    const callback2 = (/** @type {number} */ data) => {
+    /**
+     * @param {number} data
+     */
+    const callback2 = data => {
       isCall2 = true;
       assert.strictEqual(data, 1);
     };
 
-    eventDispatcher.on('1', callback1);
-    eventDispatcher.on('1', callback2);
+    eventDispatcher.on('10', callback1);
+    eventDispatcher.on('10', callback2);
+    eventDispatcher.has('10', callback2);
 
-    eventDispatcher.remove('1', callback2);
+    eventDispatcher.remove('10', callback2);
 
-    eventDispatcher.emit('1', 1);
+    eventDispatcher.emit('10', 1);
 
     if (!isCall1 && isCall2) {
       assert.fail('callback 1 not called & 2 called');
@@ -187,15 +216,24 @@ describe('eventDispatcher', () => {
     let isCall2 = false;
     let isCall3 = false;
 
-    const callback1 = (/** @type {number} */ data) => {
+    /**
+     * @param {number} data
+     */
+    const callback1 = data => {
       isCall1 = true;
       assert.strictEqual(data, 1);
     };
-    const callback2 = (/** @type {number} */ data) => {
+    /**
+     * @param {number} data
+     */
+    const callback2 = data => {
       isCall2 = true;
       assert.strictEqual(data, 1);
     };
-    const callback3 = (/** @type {number} */ data) => {
+    /**
+     * @param {number} data
+     */
+    const callback3 = data => {
       isCall3 = true;
       assert.strictEqual(data, 1);
     };
@@ -220,5 +258,37 @@ describe('eventDispatcher', () => {
     if (!isCall3) {
       assert.fail('callback 3 not called');
     }
+  });
+
+  it('benchmark', () => {
+    const eventDispatcher = new EventDispatcher();
+
+    const count = 3000000;
+    const callbacks = [];
+
+    console.time('create callbacks');
+    for (let i = 0; i < count; i++) {
+      /**
+       * @param {number} data
+       */
+      const callback = data => {
+        return;
+      };
+
+      callbacks[i] = callback;
+    }
+    console.timeEnd('create callbacks');
+
+    console.time('create events');
+    for (let i = 0; i < count; i++) {
+      eventDispatcher.on('1', callbacks[i]);
+    }
+    console.timeEnd('create events');
+
+    console.time('run');
+    eventDispatcher.emit('1', 1);
+    console.timeEnd('run');
+
+    assert.ok('done');
   });
 });
